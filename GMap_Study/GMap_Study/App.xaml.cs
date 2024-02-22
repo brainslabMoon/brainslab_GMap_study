@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace GMap_Study
+namespace GMapStudy
 {
     /// <summary>
     /// Interaction logic for App.xaml
