@@ -55,7 +55,6 @@ namespace GMapStudy
             mapControl.DragButton = MouseButton.Left;
 
             mapControl.MouseDoubleClick += new MouseButtonEventHandler(MapControlMouseLeftButtonDown);
-            mapControl.MouseLeftButtonDown += new MouseButtonEventHandler(MarkerMouseLeftButtonDown);
             mapControl.MouseLeftButtonUp += new MouseButtonEventHandler(MapControlMouseUp);
 
             currentIdx++;
@@ -68,22 +67,16 @@ namespace GMapStudy
             if(selectedMarker != null && e.LeftButton == MouseButtonState.Pressed)
             {
                 Console.WriteLine("마우스 드래그");
-                mapControl.CanDragMap = false;
-
 
                 var position = e.GetPosition(mapControl);
                 var newPosition = mapControl.FromLocalToLatLng((int)position.X, (int)position.Y);
                 selectedMarker.Position = newPosition;
             }
+
         }
 
         private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
         {
-            //if(selectedMarker != null)
-            //{
-            //    PointLatLng endPoint = mapControl.FromLocalToLatLng((int)e.GetPosition(mapControl).X, (int)e.GetPosition(mapControl).Y);
-            //    selectedMarker.Position = endPoint;
-            //}
             mapControl.CanDragMap = true;
             selectedMarker = null;
         }
@@ -91,23 +84,12 @@ namespace GMapStudy
 
         private void MarkerMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            selectedMarker = null;
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                PointLatLng mousePosition = mapControl.FromLocalToLatLng((int)e.GetPosition(mapControl).X, (int)e.GetPosition(mapControl).Y);
+            mapControl.CanDragMap = false;
+            Console.WriteLine("마커 선택됨");
 
-                foreach (GMapMarker marker in mapControl.Markers)
-                {
-                    if (Math.Abs(marker.Position.Lat - mousePosition.Lat) < 0.01 && Math.Abs(marker.Position.Lng - mousePosition.Lng) < 0.01)
-                    {
-                        selectedMarker = marker;
-                        Console.WriteLine(" 마커 클릭");
-                        //mapControl.CanDragMap = false;
-                        break;
+            FrameworkElement element = (FrameworkElement)sender;
+            selectedMarker = (GMapMarker)element.DataContext;
 
-                    }
-                }
-            }   
         }
 
 
@@ -117,18 +99,24 @@ namespace GMapStudy
             PointLatLng point = mapControl.FromLocalToLatLng((int)clickPoint.X, (int)clickPoint.Y);
             
             GMapMarker marker = new GMapMarker(point);
-            marker.Shape = new Ellipse
+
+            var temp = new Ellipse
             {
                 Width = 15,
                 Height = 15,
                 Fill = Brushes.Red
             };
+            temp.MouseDown += MarkerMouseLeftButtonDown;
+            temp.MouseUp += MapControlMouseUp;
+            marker.Shape = temp;
+
             mapControl.Markers.Add(marker);
             markers.Add(point);
 
             DrawPath();
 
         }
+
 
         private void DrawPath()
         {
