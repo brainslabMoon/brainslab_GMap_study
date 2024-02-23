@@ -13,6 +13,7 @@ using GMap.NET;
 using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using System.Windows.Controls.Primitives;
+using System.Runtime.InteropServices;
 
 
 
@@ -28,18 +29,17 @@ namespace GMapStudy
             GMapProviders.GoogleTerrainMap,
         };
 
-        PointLatLng start;
-        PointLatLng end;
-
-        GMapMarker currentMaker;
-
         List<PointLatLng> markers = new List<PointLatLng>();
+
+        MapControl draggingMarker;
+        GMapMarker selectedMarker;
+        PointLatLng startPoint;
 
 
         public MainWindow()
         {
             InitializeComponent();
-
+            NativeMethods.AllocConsole();
             InitGMap();
 
         }
@@ -53,10 +53,63 @@ namespace GMapStudy
             mapControl.Zoom = 15;
             mapControl.ShowCenter = false;
             mapControl.DragButton = MouseButton.Left;
+
             mapControl.MouseDoubleClick += new MouseButtonEventHandler(MapControlMouseLeftButtonDown);
+            mapControl.MouseLeftButtonDown += new MouseButtonEventHandler(MarkerMouseLeftButtonDown);
+            mapControl.MouseLeftButtonUp += new MouseButtonEventHandler(MapControlMouseUp);
 
             currentIdx++;
+
         }
+
+
+        private void mapControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if(selectedMarker != null && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Console.WriteLine("마우스 드래그");
+                mapControl.CanDragMap = false;
+
+
+                var position = e.GetPosition(mapControl);
+                var newPosition = mapControl.FromLocalToLatLng((int)position.X, (int)position.Y);
+                selectedMarker.Position = newPosition;
+            }
+        }
+
+        private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            //if(selectedMarker != null)
+            //{
+            //    PointLatLng endPoint = mapControl.FromLocalToLatLng((int)e.GetPosition(mapControl).X, (int)e.GetPosition(mapControl).Y);
+            //    selectedMarker.Position = endPoint;
+            //}
+            mapControl.CanDragMap = true;
+            selectedMarker = null;
+        }
+
+
+        private void MarkerMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            selectedMarker = null;
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                PointLatLng mousePosition = mapControl.FromLocalToLatLng((int)e.GetPosition(mapControl).X, (int)e.GetPosition(mapControl).Y);
+
+                foreach (GMapMarker marker in mapControl.Markers)
+                {
+                    if (Math.Abs(marker.Position.Lat - mousePosition.Lat) < 0.01 && Math.Abs(marker.Position.Lng - mousePosition.Lng) < 0.01)
+                    {
+                        selectedMarker = marker;
+                        Console.WriteLine(" 마커 클릭");
+                        //mapControl.CanDragMap = false;
+                        break;
+
+                    }
+                }
+            }   
+        }
+
 
         private void MapControlMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -74,6 +127,7 @@ namespace GMapStudy
             markers.Add(point);
 
             DrawPath();
+
         }
 
         private void DrawPath()
@@ -114,5 +168,16 @@ namespace GMapStudy
         {
             mapControl.Zoom = (int)sliderAdjustZoom.Value;
         }
+
+
+
+        static class NativeMethods
+        {
+            [DllImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            public static extern bool AllocConsole();
+        }
+
+        
     }
 }

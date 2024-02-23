@@ -30,7 +30,8 @@
             VerticalContentAlignment="Stretch"
             HorizontalContentAlignment="Stretch">
             <local:MapControl
-                x:Name="mapControl" />
+                x:Name="mapControl"
+                MouseMove="mapControl_MouseMove" />
         </GroupBox>
 
         <Grid
