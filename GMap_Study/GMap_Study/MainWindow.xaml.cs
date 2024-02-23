@@ -14,6 +14,8 @@ using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using System.Windows.Controls.Primitives;
 using System.Runtime.InteropServices;
+using System.ComponentModel.DataAnnotations.Schema;
+using static GMap.NET.Entity.OpenStreetMapRouteEntity;
 
 
 
@@ -23,18 +25,17 @@ namespace GMapStudy
     {
         int currentIdx = 0;
         object[] mapProviers = new object[]
-        { 
-            GMapProviders.GoogleSatelliteMap, 
+        {
+            GMapProviders.GoogleSatelliteMap,
             GMapProviders.GoogleMap,
             GMapProviders.GoogleTerrainMap,
         };
 
         List<PointLatLng> markers = new List<PointLatLng>();
+        List<GMapRoute> routes = new List<GMapRoute>();
+        private List<Tuple<GMapMarker, GMapRoute>> markerRoutePairs = new List<Tuple<GMapMarker, GMapRoute>>();
 
-        MapControl draggingMarker;
         GMapMarker selectedMarker;
-        PointLatLng startPoint;
-
 
         public MainWindow()
         {
@@ -64,19 +65,27 @@ namespace GMapStudy
 
         private void mapControl_MouseMove(object sender, MouseEventArgs e)
         {
-            if(selectedMarker != null && e.LeftButton == MouseButtonState.Pressed)
+            if (selectedMarker != null && e.LeftButton == MouseButtonState.Pressed)
             {
                 Console.WriteLine("마우스 드래그");
 
                 var position = e.GetPosition(mapControl);
                 var newPosition = mapControl.FromLocalToLatLng((int)position.X, (int)position.Y);
                 selectedMarker.Position = newPosition;
-            }
 
+                mapControl.Markers.Remove(selectedMarker);
+                mapControl.Markers.Add(selectedMarker);
+
+
+                markers.Remove(selectedMarker.Position);
+                markers.Add(selectedMarker.Position);
+
+                //UpdateRoute(selectedMarker);
+            }
         }
 
         private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
-        {
+        {     
             mapControl.CanDragMap = true;
             selectedMarker = null;
         }
@@ -85,7 +94,6 @@ namespace GMapStudy
         private void MarkerMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             mapControl.CanDragMap = false;
-            Console.WriteLine("마커 선택됨");
 
             FrameworkElement element = (FrameworkElement)sender;
             selectedMarker = (GMapMarker)element.DataContext;
@@ -97,7 +105,7 @@ namespace GMapStudy
         {
             Point clickPoint = e.GetPosition(mapControl);
             PointLatLng point = mapControl.FromLocalToLatLng((int)clickPoint.X, (int)clickPoint.Y);
-            
+
             GMapMarker marker = new GMapMarker(point);
 
             var temp = new Ellipse
@@ -113,14 +121,23 @@ namespace GMapStudy
             mapControl.Markers.Add(marker);
             markers.Add(point);
 
-            DrawPath();
+            DrawRoute();
+        }
 
+        private void MapControl_OnPositionChanged(PointLatLng point)
+        {
+            Console.WriteLine("MapControl_OnPositionChanged");
+        }
+
+        private void UpdateRoute(GMapMarker selectedMarker)
+        {
+            
         }
 
 
-        private void DrawPath()
+        private void DrawRoute()
         {
-            if (markers.Count > 1)
+            if (mapControl.Markers.Count > 1)
             {
                 GMapRoute route = new GMapRoute(markers);
                 route.Shape = new Path()
@@ -130,10 +147,16 @@ namespace GMapStudy
                 };
                 route.Offset = new Point(6, 6);
                 mapControl.Markers.Add(route);
+                routes.Add(route);
 
-            }         
+                if (mapControl.Markers.Contains(route))
+                {
+                    Console.WriteLine("route");
+                }
+                
+                //Console.WriteLine(mapControl.Markers.);
+            }
         }
-
 
         private void btn_changeMapProvider_Click(object sender, RoutedEventArgs e)
         {
@@ -166,6 +189,6 @@ namespace GMapStudy
             public static extern bool AllocConsole();
         }
 
-        
+
     }
 }
