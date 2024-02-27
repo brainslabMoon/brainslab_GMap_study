@@ -5,10 +5,18 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:GMap_WPF"
+    xmlns:gmap="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
+    xmlns:gmapcore="clr-namespace:GMap.NET;assembly=GMap.NET.Core"
+    xmlns:vm="clr-namespace:GMap_WPF.ViewModel"
     mc:Ignorable="d"
     Title="GMap"
     Height="1200"
     Width="2000">
+
+    <Window.DataContext>
+        <vm:MainViewVM />
+    </Window.DataContext>
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition
@@ -29,9 +37,8 @@
             Name="mapgroup"
             VerticalContentAlignment="Stretch"
             HorizontalContentAlignment="Stretch">
-            <local:MapControl
-                x:Name="mapControl"
-                MouseMove="mapControl_MouseMove" />
+            <gmap:GMapControl
+                x:Name="mapControl" />
         </GroupBox>
 
         <Grid
@@ -49,8 +56,7 @@
                 Content="지도제공자"
                 FontSize="25"
                 FontWeight="Bold"
-                Margin="3"
-                Click="btn_changeMapProvider_Click" />
+                Margin="3" />
 
             <Slider
                 x:Name="sliderAdjustZoom"
@@ -61,8 +67,7 @@
                 Maximum="20"
                 Value="15"
                 IsSnapToTickEnabled="True"
-                TickFrequency="1"
-                ValueChanged="sliderAdjustZoom_ValueChanged" />
+                TickFrequency="1" />
 
 
         </Grid>

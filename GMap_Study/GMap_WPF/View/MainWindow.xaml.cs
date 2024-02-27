@@ -20,5 +20,6 @@ namespace GMap_WPF
         {
             InitializeComponent();
         }
+    
     }
 }
