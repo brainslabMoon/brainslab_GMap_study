@@ -12,11 +12,7 @@ using System.Windows.Shapes;
 using GMap.NET;
 using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
-using System.Windows.Controls.Primitives;
 using System.Runtime.InteropServices;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using static GMap.NET.Entity.OpenStreetMapRouteEntity;
 
 
 namespace GMapStudy
@@ -87,7 +83,6 @@ namespace GMapStudy
 
         private void UpdateRoute()
         {
-
             foreach (var route in routeArray)
             {
                 mapControl.Markers.Remove(route);
@@ -99,7 +94,6 @@ namespace GMapStudy
 
         private void RefreshRoute()
         {
-            Console.WriteLine("RefreshRoute 호출");
 
             var points = markers.Select(marker => new PointLatLng(marker.Lat, marker.Lng)).ToList();
             if (points.Count > 1)
@@ -199,15 +193,11 @@ namespace GMapStudy
             mapControl.Zoom = (int)sliderAdjustZoom.Value;
         }
 
-
-
         static class NativeMethods
         {
             [DllImport("kernel32.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool AllocConsole();
         }
-
-
     }
 }
