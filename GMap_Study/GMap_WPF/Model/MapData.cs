@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GMap.NET.WindowsPresentation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,7 @@ namespace GMap_WPF.Model
     public class MapData : Notifier
     {
         private int Zoom;
+        private GMapControl MapProvider;
         public int zoom
         {
             get { return Zoom; }
@@ -22,6 +24,13 @@ namespace GMap_WPF.Model
                 }
             }
         }
+        public GMapControl mapProvider
+        {
+            get { return MapProvider; }
+            set
+            {
 
+            }
+        }
     }
 }
