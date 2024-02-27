@@ -15,8 +15,8 @@ using GMap.NET.MapProviders;
 using System.Windows.Controls.Primitives;
 using System.Runtime.InteropServices;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using static GMap.NET.Entity.OpenStreetMapRouteEntity;
-
 
 
 namespace GMapStudy
@@ -32,17 +32,17 @@ namespace GMapStudy
         };
 
         List<PointLatLng> markers = new List<PointLatLng>();
-        List<GMapRoute> routes = new List<GMapRoute>();
-        private List<Tuple<GMapMarker, GMapRoute>> markerRoutePairs = new List<Tuple<GMapMarker, GMapRoute>>();
+        List<GMapRoute> routeArray = new List<GMapRoute>();
+        List<GMapMarker> markerArray= new List<GMapMarker>();
 
         GMapMarker selectedMarker;
+        int selectedIndex;
 
         public MainWindow()
         {
             InitializeComponent();
             NativeMethods.AllocConsole();
             InitGMap();
-
         }
 
         private void InitGMap()
@@ -57,39 +57,64 @@ namespace GMapStudy
 
             mapControl.MouseDoubleClick += new MouseButtonEventHandler(MapControlMouseLeftButtonDown);
             mapControl.MouseLeftButtonUp += new MouseButtonEventHandler(MapControlMouseUp);
-
+            mapControl.MouseWheel += MapControl_MouseWheel;
             currentIdx++;
 
         }
 
+        private void MapControl_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            sliderAdjustZoom.Value = mapControl.Zoom;
+        }
 
         private void mapControl_MouseMove(object sender, MouseEventArgs e)
         {
             if (selectedMarker != null && e.LeftButton == MouseButtonState.Pressed)
             {
-                Console.WriteLine("마우스 드래그");
-
                 var position = e.GetPosition(mapControl);
                 var newPosition = mapControl.FromLocalToLatLng((int)position.X, (int)position.Y);
                 selectedMarker.Position = newPosition;
 
-                mapControl.Markers.Remove(selectedMarker);
-                mapControl.Markers.Add(selectedMarker);
+                int index = markerArray.IndexOf(selectedMarker);
+                if (index != -1)
+                {
+                    markers[index] = newPosition;
+                }
 
-
-                markers.Remove(selectedMarker.Position);
-                markers.Add(selectedMarker.Position);
-
-                //UpdateRoute(selectedMarker);
+                UpdateRoute();
             }
         }
 
-        private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
-        {     
-            mapControl.CanDragMap = true;
-            selectedMarker = null;
+        private void UpdateRoute()
+        {
+
+            foreach (var route in routeArray)
+            {
+                mapControl.Markers.Remove(route);
+            }
+            routeArray.Clear();
+
+            RefreshRoute();
         }
 
+        private void RefreshRoute()
+        {
+            Console.WriteLine("RefreshRoute 호출");
+
+            var points = markers.Select(marker => new PointLatLng(marker.Lat, marker.Lng)).ToList();
+            if (points.Count > 1)
+            {
+                GMapRoute route = new GMapRoute(points);
+                route.Shape = new Path()
+                {
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 4
+                };
+                route.Offset = new Point(6, 6);
+                mapControl.Markers.Add(route);
+                routeArray.Add(route);
+            }
+        }
 
         private void MarkerMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -97,8 +122,18 @@ namespace GMapStudy
 
             FrameworkElement element = (FrameworkElement)sender;
             selectedMarker = (GMapMarker)element.DataContext;
+            selectedIndex = (int)mapControl.Markers.IndexOf(selectedMarker) / 2;
 
         }
+
+
+
+        private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
+        {           
+            mapControl.CanDragMap = true;
+            selectedMarker = null;
+        }
+
 
 
         private void MapControlMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -119,43 +154,27 @@ namespace GMapStudy
             marker.Shape = temp;
 
             mapControl.Markers.Add(marker);
+            markerArray.Add(marker);
             markers.Add(point);
 
             DrawRoute();
         }
 
-        private void MapControl_OnPositionChanged(PointLatLng point)
-        {
-            Console.WriteLine("MapControl_OnPositionChanged");
-        }
-
-        private void UpdateRoute(GMapMarker selectedMarker)
-        {
-            
-        }
-
 
         private void DrawRoute()
         {
-            if (mapControl.Markers.Count > 1)
+            
+            GMapRoute route = new GMapRoute(markers);
+            route.Shape = new Path()
             {
-                GMapRoute route = new GMapRoute(markers);
-                route.Shape = new Path()
-                {
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 4
-                };
-                route.Offset = new Point(6, 6);
-                mapControl.Markers.Add(route);
-                routes.Add(route);
+                Stroke = new SolidColorBrush(Colors.Red),
+                StrokeThickness = 4
+            };
 
-                if (mapControl.Markers.Contains(route))
-                {
-                    Console.WriteLine("route");
-                }
-                
-                //Console.WriteLine(mapControl.Markers.);
-            }
+            route.Offset = new Point(6, 6);
+            mapControl.Markers.Add(route);
+            routeArray.Add(route);
+
         }
 
         private void btn_changeMapProvider_Click(object sender, RoutedEventArgs e)
