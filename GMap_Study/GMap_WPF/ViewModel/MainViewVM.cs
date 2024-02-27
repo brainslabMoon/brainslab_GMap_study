@@ -13,13 +13,19 @@ using GMap_WPF.Model;
 
 namespace GMap_WPF.ViewModel
 {
-    public class MainViewVM
+    public class MainViewVM : Notifier
     {
-        private readonly MapModel mapModel;
-
-        public MainViewVM(MapModel mapModel)
+        private MapData _mapData;
+        public MapData mapData
         {
-            this.mapModel = mapModel;
-        }   
+            get { return _mapData; }
+            set { _mapData = value; }
+        }
+
+        public MainViewVM()
+        {
+            mapData = new MapData();
+        }
+
     }
 }
