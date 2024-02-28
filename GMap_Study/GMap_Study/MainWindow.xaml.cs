@@ -47,9 +47,8 @@ namespace GMapStudy
             ReadJson();
             
             Closing += MainWindow_Closing;
-
+            
         }
-
         private void InitGMap()
         {
             mapControl.MapProvider = GMapProviders.GoogleKoreaSatelliteMap;

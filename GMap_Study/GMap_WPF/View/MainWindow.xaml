@@ -4,10 +4,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:GMap_WPF"
-    xmlns:gmap="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
+    xmlns:gmap="clr-namespace:GMap_WPF"
     xmlns:gmapcore="clr-namespace:GMap.NET;assembly=GMap.NET.Core"
     xmlns:vm="clr-namespace:GMap_WPF.ViewModel"
+    xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     mc:Ignorable="d"
     Title="GMap"
     Height="1200"
@@ -37,10 +38,16 @@
             Name="mapgroup"
             VerticalContentAlignment="Stretch"
             HorizontalContentAlignment="Stretch">
-            <gmap:GMapControl
-                x:Name="mapControl" />
+            <gmap:ExtensionGMapControl
+                x:Name="mapControl"
+                MapProvider="{Binding mapData.mapProvider}"
+                Position="{Binding mapData.position}"
+                MinZoom="2"
+                MaxZoom="20"
+                Zoom="{Binding mapData.zoom}"
+                dragButton="Left"
+                showCenter="False" />
         </GroupBox>
-
         <Grid
             Grid.Column="1">
             <Grid.RowDefinitions>
@@ -56,7 +63,17 @@
                 Content="지도제공자"
                 FontSize="25"
                 FontWeight="Bold"
-                Margin="3" />
+                Margin="3">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger
+                        EventName="Click">
+                        <ei:CallMethodAction
+                            TargetObject="{Binding}"
+                            MethodName="btnChangeMapProvider_Click">
+                        </ei:CallMethodAction>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </Button>
 
             <Slider
                 x:Name="sliderAdjustZoom"

@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GMap_WPF.ViewModel;
 
 namespace GMap_WPF
 {
@@ -19,7 +20,7 @@ namespace GMap_WPF
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = new MainViewVM();
         }
-    
     }
 }
