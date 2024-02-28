@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Collections.Generic;
 using System.Windows;
+using System.IO;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -13,7 +14,7 @@ using GMap.NET;
 using GMap.NET.WindowsPresentation;
 using GMap.NET.MapProviders;
 using System.Runtime.InteropServices;
-
+using Newtonsoft.Json.Linq;
 
 namespace GMapStudy
 {
@@ -29,16 +30,22 @@ namespace GMapStudy
 
         List<PointLatLng> markers = new List<PointLatLng>();
         List<GMapRoute> routeArray = new List<GMapRoute>();
-        List<GMapMarker> markerArray= new List<GMapMarker>();
+        List<GMapMarker> markerArray = new List<GMapMarker>();
 
         GMapMarker selectedMarker;
         int selectedIndex;
 
+        readonly string filePath = "markers.json";
+
         public MainWindow()
         {
-            InitializeComponent();
             NativeMethods.AllocConsole();
+
+            InitializeComponent();
             InitGMap();
+
+            Closing += MainWindow_Closing;
+
         }
 
         private void InitGMap()
@@ -56,6 +63,76 @@ namespace GMapStudy
             mapControl.MouseWheel += MapControl_MouseWheel;
             currentIdx++;
 
+            ReadJson();
+            DrawRoute();
+        }
+
+        private void ReadJson()
+        {
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    string jsonString = File.ReadAllText(filePath);
+
+                    JObject json = JObject.Parse(jsonString);
+                    JArray markersArray = (JArray)json["markers"];
+
+                    foreach (JObject pointObject in markersArray)
+                    {
+                        double lat = (double)pointObject["Lat"];
+                        double lng = (double)pointObject["Lng"];
+                        markers.Add(new PointLatLng(lat, lng));
+                    }
+
+
+                    foreach (var point in markers)
+                    {
+                        Console.WriteLine($"Latitude: {point.Lat}, Longitude: {point.Lng}");
+                    }
+
+                    if (markers.Count > 0)
+                    {
+                        foreach (var point in markers)
+                        {
+                            LoadMarker(point);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (markers.Count > 0)
+            {
+                SaveJson(markers);
+            }
+        }
+
+
+        private void SaveJson(List<PointLatLng> markers)
+        {
+            var json = new JObject();
+
+            JArray pointsArray = new JArray();
+            foreach (var point in markers)
+            {
+                JObject pointObject = new JObject();
+                pointObject.Add("Lat", point.Lat);
+                pointObject.Add("Lng", point.Lng);
+                pointsArray.Add(pointObject);
+            }
+
+            json.Add("markers", pointsArray);
+
+            string jsonString = json.ToString();
+            File.WriteAllText("markers.json", jsonString);
         }
 
         private void MapControl_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -99,7 +176,7 @@ namespace GMapStudy
             if (points.Count > 1)
             {
                 GMapRoute route = new GMapRoute(points);
-                route.Shape = new Path()
+                route.Shape = new System.Windows.Shapes.Path()
                 {
                     Stroke = new SolidColorBrush(Colors.Red),
                     StrokeThickness = 4
@@ -123,7 +200,7 @@ namespace GMapStudy
 
 
         private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
-        {           
+        {
             mapControl.CanDragMap = true;
             selectedMarker = null;
         }
@@ -135,6 +212,31 @@ namespace GMapStudy
             Point clickPoint = e.GetPosition(mapControl);
             PointLatLng point = mapControl.FromLocalToLatLng((int)clickPoint.X, (int)clickPoint.Y);
 
+            DrawMarker(point);
+            DrawRoute();
+
+        }
+
+        private void LoadMarker(PointLatLng point)
+        {
+            GMapMarker marker = new GMapMarker(point);
+
+            var temp = new Ellipse
+            {
+                Width = 15,
+                Height = 15,
+                Fill = Brushes.Red
+            };
+            temp.MouseDown += MarkerMouseLeftButtonDown;
+            temp.MouseUp += MapControlMouseUp;
+            marker.Shape = temp;
+
+            mapControl.Markers.Add(marker);
+            markerArray.Add(marker);
+        }
+
+        private void DrawMarker(PointLatLng point)
+        {
             GMapMarker marker = new GMapMarker(point);
 
             var temp = new Ellipse
@@ -151,15 +253,13 @@ namespace GMapStudy
             markerArray.Add(marker);
             markers.Add(point);
 
-            DrawRoute();
         }
-
 
         private void DrawRoute()
         {
-            
+
             GMapRoute route = new GMapRoute(markers);
-            route.Shape = new Path()
+            route.Shape = new System.Windows.Shapes.Path()
             {
                 Stroke = new SolidColorBrush(Colors.Red),
                 StrokeThickness = 4
