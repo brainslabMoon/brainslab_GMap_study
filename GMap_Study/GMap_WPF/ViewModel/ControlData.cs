@@ -49,15 +49,31 @@ namespace GMap_WPF.ViewModel
         }
 
 
-        List<GMapRoute> routeArray = new List<GMapRoute>();
-        List<GMapMarker> markerArray = new List<GMapMarker>();
+        private List<GMapRoute> RouteArray = new List<GMapRoute>();
+        public List<GMapRoute> routeArray
+        {
+            get { return RouteArray; }
+            set { RouteArray = value; }
+        }
 
+        private List<GMapMarker> MarkerArray = new List<GMapMarker>();
+        public List<GMapMarker> markerArray
+        {
+            get { return MarkerArray; }
+            set { MarkerArray = value; }
+        }
 
-        GMapProvider[] mapProviers = new GMapProvider[]
+        private GMapProvider[] MapProviers = new GMapProvider[]
         {
             GMapProviders.GoogleSatelliteMap,
             GMapProviders.GoogleMap,
             GMapProviders.GoogleTerrainMap,
         };
+        public GMapProvider[] mapProviers
+        {
+            get { return MapProviers; }
+            set { MapProviers = value; }
+        }
+
     }
 }
