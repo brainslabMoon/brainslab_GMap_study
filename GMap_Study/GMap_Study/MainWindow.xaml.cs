@@ -94,7 +94,6 @@ namespace GMapStudy
                                 foreach (var point in markers)
                                 {
                                     GMapMarker marker = DrawMarker(point);
-                                    DrawMarker(point);
 
                                     AddMarkerOnMap(marker);
                                     AddMarkerArray(marker);
@@ -192,6 +191,21 @@ namespace GMapStudy
             }
         }
 
+        private void DrawRoute()
+        {
+
+            GMapRoute route = new GMapRoute(markers);
+            route.Shape = new System.Windows.Shapes.Path()
+            {
+                Stroke = new SolidColorBrush(Colors.Red),
+                StrokeThickness = 4
+            };
+            route.Offset = new Point(6, 6);
+
+            AddRouteOnMap(route);
+            AddRouteArray(route);
+        }
+
         private void MarkerMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             mapControl.CanDragMap = false;
@@ -224,20 +238,7 @@ namespace GMapStudy
             DrawRoute();
         }
 
-        private void DrawRoute()
-        {
-
-            GMapRoute route = new GMapRoute(markers);
-            route.Shape = new System.Windows.Shapes.Path()
-            {
-                Stroke = new SolidColorBrush(Colors.Red),
-                StrokeThickness = 4
-            };
-            route.Offset = new Point(6, 6);
-
-            AddRouteOnMap(route);
-            AddRouteArray(route);
-        }
+        
 
 
         private GMapMarker DrawMarker(PointLatLng point)

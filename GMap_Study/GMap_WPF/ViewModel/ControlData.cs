@@ -12,7 +12,25 @@ namespace GMap_WPF.ViewModel
 {
     public class ControlData
     {
-        readonly string filePath = "markers.json";
+        private GMapControl? MapControl;
+        public GMapControl mapControl
+        {
+            get { return MapControl; }
+            set
+            {
+                if(MapControl != value)
+                {
+                    MapControl = value;
+                }
+            }
+        }
+
+        private readonly string FilePath = "markers.json";
+        public  string filePath
+        {
+            get { return FilePath; }
+            set { }
+        }
 
         private int CurrentMapProviderIdx = 0;
         public int currentMapProviderIdx
@@ -28,7 +46,7 @@ namespace GMap_WPF.ViewModel
         }
 
         private GMapMarker? SelectedMarker;
-        public GMapMarker selectedMarker
+        public GMapMarker? selectedMarker
         {
             get { return SelectedMarker; }
             set

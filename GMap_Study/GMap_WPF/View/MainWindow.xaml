@@ -12,7 +12,17 @@
     mc:Ignorable="d"
     Title="GMap"
     Height="1200"
-    Width="2000">
+    Width="2000"
+    >
+    <i:Interaction.Triggers>
+        <i:EventTrigger
+            EventName="Closing">
+            <ei:CallMethodAction
+                TargetObject="{Binding}"
+                MethodName="MainWindow_Closing">
+            </ei:CallMethodAction>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
 
     <Window.DataContext>
         <vm:MainViewVM />
@@ -44,10 +54,36 @@
                 Position="{Binding mapData.position}"
                 MinZoom="2"
                 MaxZoom="20"
-                Zoom="{Binding mapData.zoom}"
+                Zoom="{Binding mapData.zoom, Mode=TwoWay}"
                 dragButton="Left"
-                showCenter="False" />
+                showCenter="False"
+                canDragMap="True">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger
+                        EventName="MouseDoubleClick">
+                        <ei:CallMethodAction
+                            TargetObject="{Binding}"
+                            MethodName="mapControl_MouseDoubleClick">
+                        </ei:CallMethodAction>
+                    </i:EventTrigger>
+                    <i:EventTrigger
+                        EventName="MouseMove">
+                        <ei:CallMethodAction
+                            TargetObject="{Binding}"
+                            MethodName="mapControl_MouseMove">
+                        </ei:CallMethodAction>
+                    </i:EventTrigger>
+                    <i:EventTrigger
+                        EventName="Loaded">
+                        <ei:CallMethodAction
+                            TargetObject="{Binding}"
+                            MethodName="mapControl_Loaded">
+                        </ei:CallMethodAction>
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </gmap:ExtensionGMapControl>
         </GroupBox>
+
         <Grid
             Grid.Column="1">
             <Grid.RowDefinitions>
@@ -82,9 +118,12 @@
                 Width="20"
                 Minimum="2"
                 Maximum="20"
-                Value="15"
+                Value="{Binding mapData.zoom}"
                 IsSnapToTickEnabled="True"
-                TickFrequency="1" />
+                TickFrequency="1">
+            </Slider>
+
+
 
 
         </Grid>

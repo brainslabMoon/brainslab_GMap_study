@@ -1,14 +1,5 @@
-﻿using System.Text;
+﻿using GMap_WPF.ViewModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using GMap_WPF.ViewModel;
 
 namespace GMap_WPF
 {
@@ -20,7 +11,6 @@ namespace GMap_WPF
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new MainViewVM();
         }
     }
 }
