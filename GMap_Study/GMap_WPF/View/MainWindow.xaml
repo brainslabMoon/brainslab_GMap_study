@@ -12,8 +12,7 @@
     mc:Ignorable="d"
     Title="GMap"
     Height="1200"
-    Width="2000"
-    >
+    Width="2000">
     <i:Interaction.Triggers>
         <i:EventTrigger
             EventName="Closing">
@@ -122,10 +121,6 @@
                 IsSnapToTickEnabled="True"
                 TickFrequency="1">
             </Slider>
-
-
-
-
         </Grid>
     </Grid>
 </Window>

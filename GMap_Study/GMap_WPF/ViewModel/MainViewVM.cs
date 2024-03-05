@@ -50,6 +50,30 @@ namespace GMap_WPF.ViewModel
             {
                 SavetoJson(controlData.markers);
             }
+
+            ClearAllResource();
+        }
+
+        private void ClearAllResource()
+        {
+            if(controlData.mapControl.Markers.Count > 1)
+            {
+                ClearMarkers();
+            }
+       
+            controlData.mapControl.Dispose();
+            Application.Current.Shutdown();
+        }
+
+        private void ClearMarkers()
+        {
+            foreach(GMapMarker marker in controlData.markerArray)
+            {
+                controlData.mapControl.Markers.Remove(marker);
+            }
+
+            controlData.markerArray.Clear();
+            controlData.markers.Clear();
         }
 
         private void ReadJson()
@@ -79,7 +103,7 @@ namespace GMap_WPF.ViewModel
                             {
                                 foreach (var point in controlData.markers)
                                 {
-                                    GMapMarker marker = DrawMarker(point);              
+                                    GMapMarker marker = DrawMarker(point);
 
                                     AddMarkerOnMap(marker);
                                     AddMarkerArray(marker);
@@ -113,8 +137,11 @@ namespace GMap_WPF.ViewModel
             json.Add("markers", pointsArray);
 
             string jsonString = json.ToString();
-            File.WriteAllText("markers.json", jsonString);
 
+            using (StreamWriter file = File.CreateText("markers.json"))
+            {
+                file.Write(jsonString);
+            }
         }
 
         public void mapControl_Loaded(object sender, RoutedEventArgs e)
@@ -143,7 +170,7 @@ namespace GMap_WPF.ViewModel
 
         public void mapControl_MouseMove(object sender, MouseEventArgs e)
         {
-            if(controlData.selectedMarker != null && e.LeftButton == MouseButtonState.Pressed) 
+            if (controlData.selectedMarker != null && e.LeftButton == MouseButtonState.Pressed)
             {
                 var position = e.GetPosition(controlData.mapControl);
                 var newPosition = controlData.mapControl.FromLocalToLatLng((int)position.X, (int)position.Y);
@@ -162,7 +189,7 @@ namespace GMap_WPF.ViewModel
 
         private void UpdateRoute()
         {
-            foreach(var route in controlData.routeArray)
+            foreach (var route in controlData.routeArray)
             {
                 controlData.mapControl.Markers.Remove(route);
             }
@@ -174,7 +201,7 @@ namespace GMap_WPF.ViewModel
         private void RefreshRoute()
         {
             var points = controlData.markers.Select(marker => new PointLatLng(marker.Lat, marker.Lng)).ToList();
-            if(points.Count > 1)
+            if (points.Count > 1)
             {
                 DrawRoute(points);
             }
@@ -182,7 +209,7 @@ namespace GMap_WPF.ViewModel
 
 
         public void mapControl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {       
+        {
             if (controlData.mapControl != null)
             {
                 Point clickPoint = e.GetPosition(controlData.mapControl);
@@ -195,12 +222,22 @@ namespace GMap_WPF.ViewModel
                 AddMarkerPosArray(point);
 
                 DrawRoute(controlData.markers);
-            }             
+            }
         }
 
         private GMapMarker DrawMarker(PointLatLng point)
         {
             GMapMarker marker = new GMapMarker(point);
+
+
+            var grid = new Grid()
+            {
+                Width = 20,
+                Height = 20,
+                Background = Brushes.Transparent,
+            };
+            grid.MouseDown += MarkerMouseLeftButtonDown;
+            grid.MouseUp += MarkerMouseUp;
 
             var temp = new Ellipse
             {
@@ -208,9 +245,9 @@ namespace GMap_WPF.ViewModel
                 Height = 15,
                 Fill = Brushes.Red
             };
-            temp.MouseDown += MarkerMouseLeftButtonDown;
-            temp.MouseUp += MapControlMouseUp;
-            marker.Shape = temp;
+
+            grid.Children.Add(temp);
+            marker.Shape = grid;
 
             return marker;
         }
@@ -223,7 +260,7 @@ namespace GMap_WPF.ViewModel
                 Stroke = new SolidColorBrush(Colors.Red),
                 StrokeThickness = 4
             };
-            route.Offset = new Point(6, 6);
+            route.Offset = new Point(10, 10);
 
             AddRouteOnMap(route);
             AddRouteArray(route);
@@ -262,8 +299,8 @@ namespace GMap_WPF.ViewModel
             FrameworkElement element = (FrameworkElement)sender;
             controlData.selectedMarker = (GMapMarker)element.DataContext;
 
-        }       
-        private void MapControlMouseUp(object sender, MouseButtonEventArgs e)
+        }
+        public void MarkerMouseUp(object sender, MouseButtonEventArgs e)
         {
             controlData.mapControl.CanDragMap = true;
             controlData.selectedMarker = null;
