@@ -69,6 +69,11 @@ namespace GMap_WPF.ViewModel
         {
             foreach(GMapMarker marker in controlData.markerArray)
             {
+                if(marker.Shape is Grid grid)
+                {
+                    grid.MouseDown -= MarkerMouseLeftButtonDown;
+                    grid.MouseUp -= MarkerMouseUp;
+                }
                 controlData.mapControl.Markers.Remove(marker);
             }
 
